@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Choose a plan | SL Property Hub{% endblock %}
+
+{% block content %}
+
+{# ---------------- Page header ---------------- #}
+<section class="page-head">
+  <p class="eyebrow">SUBSCRIPTIONS</p>
+  <h1>Choose a plan</h1>
+  <p>
+    Pay offline using the payment instructions provided by the platform
+    administrator. Access is activated only after verification.
+  </p>
+
+  <div class="actions">
+    <a class="btn {% if kind == 'listing' %}btn-primary{% else %}btn-outline{% endif %}"
+       href="?kind=listing">
+      Property &amp; land listings
+    </a>
+    <a class="btn {% if kind == 'ad' %}btn-primary{% else %}btn-outline{% endif %}"
+       href="?kind=ad">
+      Company advertising
+    </a>
+  </div>
+</section>
+
+{# ---------------- Active subscription ---------------- #}
+{% if active_subscription %}
+  <div class="notice">
+    <strong>Current plan:</strong> {{ active_subscription.plan.name }}
+    · expires {{ active_subscription.ends_at|date:'d M Y' }}
+    {% if kind == 'listing' %}
+      · {{ active_subscription.listings_remaining }} listings remaining
+    {% endif %}
+  </div>
+{% endif %}
+
+{# ---------------- Plan cards ---------------- #}
+<div class="card-grid">
+  {% for plan in plans %}
+    <article class="card plan-card">
+      <p class="eyebrow">{{ plan.get_kind_display }}</p>
+      <h2>{{ plan.name }}</h2>
+
+      <p class="price">SLE {{ plan.price_sle|floatformat:2|intcomma }}</p>
+
+      {% if plan.description %}
+        <p>{{ plan.description }}</p>
+      {% endif %}
+
+      <p>Duration: {{ plan.duration_days }} days</p>
+
+      {% if kind == 'listing' and plan.listing_limit %}
+        <p>Listings included: {{ plan.listing_limit }}</p>
+      {% endif %}
+
+      <a class="btn"
+         href="{% url 'subscriptions:submit_payment' plan.id %}"
+         aria-label="Submit payment for {{ plan.name }}">
+        Submit payment details
+      </a>
+    </article>
+  {% empty %}
+    <p>No paid plans are currently available. Please check again later.</p>
+  {% endfor %}
+</div>
+
+{# ---------------- Payment history ---------------- #}
+<section class="section">
+  <h2>Payment history</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Plan</th>
+          <th>Amount (SLE)</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in payments %}
+          <tr>
+            <td>{{ payment.reference }}</td>
+            <td>{{ payment.plan.name }}</td>
+            <td>{{ payment.amount_sle|floatformat:2|intcomma }}</td>
+            <td>
+              <span class="status status-{{ payment.status }}">
+                {{ payment.get_status_display }}
+              </span>
+            </td>
+            <td>{{ payment.created_at|date:'d M Y' }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">
+              <em class="muted">No payment submissions yet.</em>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

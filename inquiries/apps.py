@@ -1,0 +1,9 @@
+"""App configuration for the inquiries app."""
+
+from django.apps import AppConfig
+
+
+class InquiriesConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "inquiries"
+    verbose_name = "Inquiries"

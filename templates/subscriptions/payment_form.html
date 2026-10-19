@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Pay for {{ plan.name }} | SL Property Hub{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <p class="eyebrow">OFFLINE PAYMENT VERIFICATION</p>
+  <h1>{{ plan.name }}</h1>
+
+  <div class="notice">
+    <p style="margin:0 0 .5rem">
+      <strong>Amount due:</strong>
+      SLE {{ plan.price_sle|floatformat:2|intcomma }}
+    </p>
+    <p style="margin:0">
+      Duration: <strong>{{ plan.duration_days }} days</strong>
+      {% if plan.kind == 'listing' %}
+        · Includes up to <strong>{{ plan.listing_limit }}</strong> listings
+      {% endif %}
+    </p>
+  </div>
+
+  <p>
+    Transfer funds using the official payment details supplied by the
+    platform administrator. This site does not collect or process payments.
+  </p>
+
+  <p class="fine-print">
+    Submit the payment provider, payer details, transaction reference, and
+    optional proof (JPG, PNG, or PDF, up to 5 MB). Do not upload PINs,
+    passwords, or identity documents unless specifically required through
+    a verified official process.
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="form-card">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Submit for verification</button>
+  </form>
+</div>
+{% endblock %}

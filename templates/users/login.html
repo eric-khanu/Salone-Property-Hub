@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Log in | SL Property Hub{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <p class="eyebrow">WELCOME BACK</p>
+  <h1>Log in</h1>
+
+  <form method="post" class="form-card" novalidate>
+    {% csrf_token %}
+
+   
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+
+
+    {{ form.as_p }}
+
+    <button class="btn" type="submit">Log in</button>
+  </form>
+
+  <p class="muted small">
+    New here?
+    <a href="{% url 'users:register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+      Create an account
+    </a>.
+    {# Uncomment when you add a password-reset view:
+    #}
+  </p>
+</div>
+{% endblock %}

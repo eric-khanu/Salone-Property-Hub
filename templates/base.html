@@ -1,0 +1,92 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {# Theme colour — must match --green in output.css #}
+  <meta name="theme-color" content="#1d5144">
+  <meta name="theme-color" content="#123a31" media="(prefers-color-scheme: dark)">
+
+  {% block meta %}
+    <meta name="description" content="Find property to rent or buy in Sierra Leone.">
+    <meta name="robots" content="index, follow">
+  {% endblock %}
+
+  <title>{% block title %}SL Property Hub{% endblock %}</title>
+
+  {# ---------- Favicons ---------- #}
+  <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="{% static 'icons/favicon.svg' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+
+  {# ---------- Stylesheet ---------- #}
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container nav">
+     <a class="brand" href="{% url 'home' %}" aria-label="Salone Property Hub home">
+        <img class="brand-logo"
+            src="{% static 'images/Salone property hub.jpg' %}"
+            alt="">
+        <span class="brand-text">
+            <span class="brand-line-1">SALONE PROPERTY</span>
+            <span class="brand-line-2">HUB</span>
+        </span>
+    </a>
+
+      <nav aria-label="Primary">
+        <a href="{% url 'home' %}">PROPERTIES</a>
+        <a href="{% url 'subscriptions:plans' %}">PLANS &amp; PAYMENTS</a>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'dashboard:home' %}">DASHBOARD</a>
+          <form class="inline-form" method="post" action="{% url 'users:logout' %}">
+            {% csrf_token %}
+            <button class="nav-button" type="submit" aria-label="Log out">Log out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:login' %}">Log in</a>
+          <a class="btn btn-small" href="{% url 'users:register' %}">Join free</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main" id="main">
+    {% if messages %}
+      <div class="messages" aria-live="polite">
+        {% for message in messages %}
+          <div class="notice notice-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container footer-inner">
+      <strong>SL Property Hub</strong>
+      <span>
+        Property discovery for Sierra Leone
+        <span aria-hidden="true">·</span>
+        Freetown and all regions
+      </span>
+      <span>Always verify ownership, documents and payment details before any offline transaction.</span>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

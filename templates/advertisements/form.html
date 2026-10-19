@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ heading|default:"Create advertisement" }} | SL Property Hub{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <a class="back-link" href="{% url 'dashboard:home' %}">← Back to dashboard</a>
+
+  <p class="eyebrow">COMPANY ADVERTISING</p>
+  <h1>{{ heading|default:"Create advertisement" }}</h1>
+
+  <p class="muted">
+    Advertising campaigns are time-limited by your verified advertising
+    subscription. Only upload creative assets you own or have permission
+    to use.
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="form-card">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <p class="fine-print">
+      Images: JPG, PNG or WebP. Avoid text-heavy banners — the platform
+      displays your title and a "Sponsored" label alongside the image.
+    </p>
+
+    <button class="btn" type="submit">
+      {% if heading and "Edit" in heading %}Save changes{% else %}Publish advertisement{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}

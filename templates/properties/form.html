@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ heading }} | SL Property Hub{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <a class="back-link" href="{% url 'dashboard:home' %}">← Back to dashboard</a>
+
+  <p class="eyebrow">PROPERTY MANAGEMENT</p>
+  <h1>{{ heading }}</h1>
+
+  <p class="muted">
+    Your listing is published automatically when you save it while your
+    subscription is active. You can update details and upload up to 12 photos
+    per save (8 MB per photo).
+  </p>
+
+  <form method="post" enctype="multipart/form-data" class="form-card">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <p class="form-field">
+      <label for="id_images">Property photos</label>
+      <input type="file"
+             name="images"
+             id="id_images"
+             accept="image/jpeg,image/png,image/webp"
+             multiple
+             aria-describedby="id_images_help">
+      <span id="id_images_help" class="helptext">
+        Upload JPG, PNG or WebP photos. Maximum 12 photos per save, 8 MB each.
+      </span>
+    </p>
+
+    <button class="btn" type="submit">Save and publish</button>
+  </form>
+
+  {% if property %}
+    {% with photos=property.images.all %}
+      <section class="section">
+        <h2>Current photos{% if photos %} ({{ photos|length }}){% endif %}</h2>
+
+        <div class="photo-grid">
+          {% for photo in photos %}
+            <div>
+              <img src="{{ photo.image.url }}" alt="{{ photo.alt_text|default:property.title }}">
+              <form method="post"
+                    action="{% url 'properties:delete_image' photo.id %}"
+                    onsubmit="return confirm('Delete this photo? This cannot be undone.');">
+                {% csrf_token %}
+                <button class="btn btn-outline"
+                        type="submit"
+                        aria-label="Delete photo {{ forloop.counter }}">
+                  Delete photo
+                </button>
+              </form>
+            </div>
+          {% empty %}
+            <p class="muted">No photos uploaded yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+    {% endwith %}
+  {% endif %}
+</div>
+{% endblock %}

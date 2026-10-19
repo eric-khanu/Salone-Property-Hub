@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Find Property in Sierra Leone | SL Property Hub{% endblock %}
+
+{% block content %}
+
+{# ============ HERO + SEARCH ============ #}
+<section class="hero">
+  <p class="eyebrow">YOUR NEXT MOVE STARTS HERE</p>
+  <h1>Find your dream house or buy your land here</h1>
+  <p>Explore homes, apartments, land and commercial spaces across Sierra Leone.</p>
+
+  <form class="search-panel" method="get" role="search">
+    <input
+      name="q"
+      class="search-q"
+      placeholder="Neighborhood, city or keyword"
+      value="{{ q }}"
+      aria-label="Search keyword">
+
+    <select name="listing" aria-label="Listing type">
+      <option value="">Rent or buy</option>
+      <option value="rent" {% if listing == 'rent' %}selected{% endif %}>For rent</option>
+      <option value="sale" {% if listing == 'sale' %}selected{% endif %}>For sale</option>
+    </select>
+
+    <select name="type" aria-label="Property type">
+      <option value="">Any property type</option>
+      <option value="house"      {% if ptype == 'house' %}selected{% endif %}>House</option>
+      <option value="apartment"  {% if ptype == 'apartment' %}selected{% endif %}>Apartment</option>
+      <option value="land"       {% if ptype == 'land' %}selected{% endif %}>Land</option>
+      <option value="commercial" {% if ptype == 'commercial' %}selected{% endif %}>Commercial</option>
+      <option value="room"       {% if ptype == 'room' %}selected{% endif %}>Room</option>
+      <option value="other"      {% if ptype == 'other' %}selected{% endif %}>Other</option>
+    </select>
+
+    <select name="currency" aria-label="Currency">
+      <option value="">Any currency</option>
+      <option value="SLE" {% if currency == 'SLE' %}selected{% endif %}>SLE</option>
+      <option value="USD" {% if currency == 'USD' %}selected{% endif %}>USD</option>
+    </select>
+
+    <div class="price-range">
+      <input name="min_price" type="number" min="0" inputmode="numeric" placeholder="Min price" value="{{ min_price }}" aria-label="Minimum price">
+      <input name="max_price" type="number" min="0" inputmode="numeric" placeholder="Max price" value="{{ max_price }}" aria-label="Maximum price">
+    </div>
+
+    <button class="btn search-submit" type="submit">Search properties</button>
+  </form>
+
+  {% if q or listing or ptype or currency or min_price or max_price %}
+    <p class="muted filters-active">
+      Filters active.
+      <a href="{% url 'home' %}">Clear all</a>.
+    </p>
+  {% endif %}
+</section>
+
+{# ============ BANNER ADS ============ #}
+{% for ad in banner_ads %}
+  <a class="ad-banner"
+     href="{% url 'advertisements:click' ad.pk %}"
+     target="_blank"
+     rel="sponsored noopener noreferrer">
+    {% if ad.image %}<img src="{{ ad.image.url }}" alt="">{% endif %}
+    
+  </a>
+{% endfor %}
+
+{# ============ SPOTLIGHT ADS — image-only, taller cards ============ #}
+{% if spotlight_ads %}
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">LOCAL BUSINESSES</p>
+        <h2>Featured companies</h2>
+      </div>
+    </div>
+
+    <div class="property-grid">
+      {% for ad in spotlight_ads %}
+        <a class="property-card ad-card"
+           href="{% url 'advertisements:click' ad.pk %}"
+           target="_blank"
+           rel="sponsored noopener noreferrer"
+           aria-label="{{ ad.title }}">
+          {% if ad.image %}
+            <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{# ============ MAIN LAYOUT: PROPERTIES + STICKY AD RAIL ============ #}
+<div class="layout-with-rail{% if not sidebar_ads %} layout-single{% endif %}">
+
+  {# -------- Left column: property grid (shorter card images) -------- #}
+  <div class="layout-main">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">THE LATEST LISTINGS</p>
+        <h2>Properties worth a closer look</h2>
+      </div>
+      <span class="muted">
+        {% if total_count %}
+          {{ properties|length }} of {{ total_count|intcomma }} shown
+        {% else %}
+          {{ properties|length }} shown
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="property-grid">
+      {% for p in properties %}
+        <a class="property-card"
+           href="{{ p.get_absolute_url }}"
+           aria-label="View {{ p.title }}">
+          <div class="property-image">
+            {% with cover=p.images.first %}
+              {% if cover %}
+                <img src="{{ cover.image.url }}"
+                     alt="{{ cover.alt_text|default:p.title }}"
+                     width="600" height="400"
+                     loading="lazy">
+              {% else %}
+                <div class="image-placeholder">⌂<small>Sierra Leone property</small></div>
+              {% endif %}
+            {% endwith %}
+            <span class="tag">{{ p.get_listing_type_display }}</span>
+          </div>
+
+          <div class="card-body">
+            <p class="location">
+              {% if p.neighborhood %}{{ p.neighborhood }}, {% endif %}
+              {{ p.district_or_city }}, {{ p.region }}
+            </p>
+            <h3>{{ p.title }}</h3>
+            <p class="price">{{ p.currency }} {{ p.price|floatformat:0|intcomma }}</p>
+
+            <div class="features">
+              <span>▦ {{ p.bedrooms }} bed{{ p.bedrooms|pluralize }}</span>
+              <span>◈ {{ p.bathrooms }} bath{{ p.bathrooms|pluralize }}</span>
+              {% if p.area_sqft %}<span>{{ p.area_sqft }} sq ft</span>{% endif %}
+            </div>
+          </div>
+        </a>
+      {% empty %}
+        <div class="empty-state">
+          <h3>No listings found</h3>
+          <p>Try a broader search, or check back soon for new properties.</p>
+          <a class="btn" href="{% url 'home' %}">Clear filters</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# -------- Right column: sticky ad rail -------- #}
+  {% if sidebar_ads %}
+    <aside class="layout-rail" aria-label="Sponsored advertisements">
+      <h2 class="rail-heading">Sponsored</h2>
+      <div class="ad-rail">
+        {% for ad in sidebar_ads %}
+          <a class="ad-rail-item"
+             href="{% url 'advertisements:click' ad.pk %}"
+             target="_blank"
+             rel="sponsored noopener noreferrer">
+            {% if ad.image %}
+              <img src="{{ ad.image.url }}" alt=""
+                   width="300" height="130"
+                   loading="lazy">
+            {% endif %}
+            <span>{{ ad.title }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </aside>
+  {% endif %}
+
+</div>
+
+{# ============ CTA ============ #}
+<section class="cta">
+  <div>
+    <p class="eyebrow">ARE YOU A PROPERTY OWNER OR AGENT?</p>
+    <h2>Put your property in front of the right people.</h2>
+    <p>Create an account, submit your listing, and choose a listing plan.</p>
+  </div>
+  <a class="btn btn-light" href="{% url 'users:register' %}">List a property</a>
+</section>
+
+{% endblock %}

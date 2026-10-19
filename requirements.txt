@@ -1,0 +1,6 @@
+Django
+django-environ
+Pillow
+psycopg[binary]
+whitenoise
+gunicorn
